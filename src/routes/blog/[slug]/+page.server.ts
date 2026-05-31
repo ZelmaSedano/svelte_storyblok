@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { getStoryblokStory } from '$lib/api/getStoryblokStory';
 import type { Article } from '$lib/typings/article';
-    
+export const prerender = false;
 export const load: PageServerLoad = async ({ params }) => {
 
   const fullSlug = `posts/${params.slug}`;
