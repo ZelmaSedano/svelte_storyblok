@@ -9,7 +9,8 @@ export const getStoryblokStory = async ( slug: string ) => {
 
   const { data } = await storyblokApi.get(`cdn/stories/${slug}`, {
     version: 'published',
-    //version: 'draft', // or 'draft' for preview mode
+    // version: 'draft', 
+    // or 'draft' for preview mode
   });
 
   return data.story

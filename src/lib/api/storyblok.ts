@@ -11,7 +11,7 @@ storyblokInit({
   accessToken: token,
   use: [apiPlugin],
   components: {
-   
+    
   },
 });
 
