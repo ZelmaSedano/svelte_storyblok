@@ -1,5 +1,9 @@
 <script>
-    const { data } = $props();
-    console.log('Climate page data:', data);
-
+    // SvelteKit pages receive data as a prop
+    // @ts-ignore
+    import NasaPrecipitationWidget from '$lib/components/climatewidgets/NasaPrecipitationWidget.svelte';
 </script>
+
+<section class="space-y-6">
+    <NasaPrecipitationWidget />
+</section>
