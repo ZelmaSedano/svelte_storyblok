@@ -14,7 +14,12 @@ export default {
     }),
     paths: { base },
     prerender: {
-      entries: ['*']  // or a manual list if you prefer
+      entries: ['*'],  // or a manual list if you prefer
+	   handleHttpError: ({ path, status, message }) => {
+        // log, but don't crash the build when a route like /blog fails
+        console.warn(`Prerender error ${status} on ${path}: ${message}`);
+        return 'ignore';
+      }
     }
   }
 };

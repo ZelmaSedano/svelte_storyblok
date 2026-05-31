@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { getArticles } from '$lib/api/articles';
-export const prerender = false;
+export const prerender = true;
 
 export const load: PageServerLoad = async ({ url }) => {
   const page = Number(url.searchParams.get('page') ?? '1');
