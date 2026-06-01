@@ -5,5 +5,5 @@
 </script>
 
 <section class="space-y-6">
-    <NasaPrecipitationWidget />
+    <NasaPrecipitationWidget title="Nasa Precipitation Data of Southern Norway Region" style="backdrop-blur-md bg-white/10 rounded-md p-2" />
 </section>

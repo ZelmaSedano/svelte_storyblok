@@ -4,16 +4,16 @@
   console.log('Page data:', data);
 </script>
 
-<section class="space-y-6">
+<section class="space-y-6 backdrop-blur-md bg-white/10 shadow-lg p-4 rounded-lg">
     <form>
-        <p class="text-slate-600">Browse the latest posts and search by keyword.</p>
+        <p class="text-white-600">Browse the latest posts and search by keyword.</p>
 
-        <input type="text" name="q" placeholder="Search posts..." value={data.search} />
+        <input class="backdrop-blur-md bg-white/10 p-2 rounded-lg" type="text" name="q" placeholder="Search posts..." value={data.search} />
         <button type="submit">search</button>
     </form>
-  <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-    <p class="text-slate-700 font-semibold">{data.total} article{data.total === 1 ? '' : 's'} found</p>
-    <p class="text-slate-500 text-sm">Page {data.page} · {data.perPage} per page</p>
+  <div class="bg-slate-50 p-4 rounded-lg text-white backdrop-blur-md bg-white/10">
+    <p class=" font-semibold">{data.total} article{data.total === 1 ? '' : 's'} found</p>
+    <p class=" text-sm">Page {data.page} · {data.perPage} per page</p>
   </div>
 
   <ArticlesList stories={data.articles} />

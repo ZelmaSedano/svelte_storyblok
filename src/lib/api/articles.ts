@@ -1,7 +1,7 @@
-import { PUBLIC_STORYBLOK_TOKEN } from '$env/static/public';
+import { env as publicEnv } from '$env/dynamic/public';
 
 export async function getArticles(page = 1, perPage = 12, search: string | null) {
-  const token = PUBLIC_STORYBLOK_TOKEN;
+  const token = publicEnv.PUBLIC_STORYBLOK_TOKEN;
 
   //main endpoint for fetching articles from Storyblok
   const url = new URL('https://api.storyblok.com/v2/cdn/stories');

@@ -1,108 +1,132 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import {
-    Chart,
-    LineController,
-    LineElement,
-    PointElement,
-    LinearScale,
-    CategoryScale,
-    Tooltip,
-    Legend
-  } from 'chart.js';
-  import { getNasaPrecipData } from '$lib/api/nasa-precip';
+  import { onMount } from "svelte";
+  import ApexCharts from "apexcharts";
+  import { getNasaPrecipData } from "$lib/api/nasa-precip";
 
-  Chart.register(
-    LineController,
-    LineElement,
-    PointElement,
-    LinearScale,
-    CategoryScale,
-    Tooltip,
-    Legend
-  );
-
-  let title = 'NASA Precipitation';
-  let canvasEl: HTMLCanvasElement | null = null;
-  let chart: Chart | null = null;
+  let chartEl: HTMLDivElement | null = null;
+  let chart: ApexCharts | null = null;
   let loading = true;
   let error: string | null = null;
 
-  onMount(() => {
+  const { title, style } = $props();
 
-    const destroyChart = () => chart?.destroy();
+  onMount(() => {
+    const destroyChart = () => {
+      chart?.destroy();
+      chart = null;
+    };
 
     (async () => {
       try {
-        console.log('Widget mounted, fetching data');
+        console.log("Widget mounted, fetching data");
         const geojson = await getNasaPrecipData();
-        console.log('Raw NASA data:', geojson);
+        console.log("Raw NASA data:", geojson);
 
+        const defaultTitle: string = geojson.header?.title;
         const features: any[] = geojson.features;
-        console.log('Fetched NASA precipitation data:', features.length);
+        console.log("Fetched NASA precipitation data:", features.length);
 
-        if (!features?.length) throw new Error('No features in data');
+        if (!features?.length) throw new Error("No features in data");
 
         const firstSeries = features[0].properties.parameter.PRECTOTCORR;
         const dateKeys = Object.keys(firstSeries).sort();
+
+        // x-axis labels as YYYY-MM-DD
         const labels = dateKeys.map((d) =>
-          d.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')
+          d.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
         );
 
         const maxLines = 25;
-        const datasets = features.slice(0, maxLines).map((f: any, i: number) => {
+        const series = features.slice(0, maxLines).map((f: any, i: number) => {
           const [lon, lat] = f.geometry.coordinates;
-          const series = f.properties.parameter.PRECTOTCORR;
-          const data = dateKeys.map((k) => series[k]);
+          const precipSeries = f.properties.parameter.PRECTOTCORR;
+          const data = dateKeys.map((k) => precipSeries[k]);
+
           return {
-            label: `lon ${lon.toFixed(3)}, lat ${lat.toFixed(3)}`,
+            name: `lon ${lon.toFixed(3)}, lat ${lat.toFixed(3)}`,
             data,
-            borderColor: `hsl(${(i * 40) % 360} 80% 60%)`,
-            borderWidth: 2,
-            tension: 0.3,
-            fill: false
           };
         });
 
-        console.log('Prepared labels/datasets', { labels, datasetsCount: datasets.length });
+        console.log("Prepared labels/series", {
+          labels,
+          seriesCount: series.length,
+        });
 
-        // Flip loading before chart, so even if chart crashes you see the canvas/error.
         loading = false;
 
-        if (!canvasEl) {
-          console.error('Canvas element not ready when creating chart');
+        if (!chartEl) {
+          console.error("Chart element not ready when creating Apex chart");
           return;
         }
 
-        console.log('Creating Chart.js chart', canvasEl);
+        const options: ApexCharts.ApexOptions = {
+          noData: {
+            text: "Loading precipitation data...",
+          },
+          chart: {
+            type: "line",
+            background: "transparent",
+            toolbar: { show: false },
+            animations: { enabled: true },
+          },
+          series,
+          xaxis: {
+            categories: labels,
+            labels: {
+              style: { colors: "#ffffff" },
+            },
+          },
+          yaxis: {
+            title: {
+              text: "Precipitation (mm/day)",
+              style: { color: "#ffffff" },
+            },
+            labels: {
+              style: { colors: "#ffffff" },
+            },
+          },
+          stroke: {
+            curve: "smooth",
+            width: 2,
+          },
+          colors: series.map((_, i) => `hsl(${(i * 40) % 360} 80% 60%)`),
+          legend: {
+            show: true,
+            labels: {
+              colors: "#ffffff",
+            },
+          },
+          tooltip: {
+            theme: "dark",
+            x: { show: true },
+            y: {
+              formatter: (value: number) => `${value.toFixed(2)} mm`,
+            },
+          },
+          title: {
+            text: title ?? defaultTitle,
+            style: {
+              color: "#ffffff",
+              fontSize: "14px",
+              fontWeight: "600",
+            },
+          },
+        };
 
-        chart = new Chart(canvasEl, {
-          type: 'line',
-          data: { labels, datasets },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label(ctx) {
-                    const label = ctx.dataset.label ?? '';
-                    const value = ctx.parsed.y;
-                    const date = ctx.label;
-                    return `${label} – ${date}: ${value}`;
-                  }
-                }
-              },
-              title: { display: true, text: title }
-            }
+        console.log("Creating ApexCharts chart", chartEl);
+        chart = new ApexCharts(chartEl, options);
+        await chart.render().then((data) => {
+          if (data) {
+            chart?.updateOptions({
+              ...options,
+              ...{ noData: { text: "Loading precipitation data..." } },
+            });
           }
         });
-
-        console.log('Chart created successfully');
-        loading = false;
       } catch (e: any) {
-        console.error('Error in NasaPrecipSelfContained widget:', e);
-        error = e?.message ?? 'Unknown error';
+        console.error("Error in NasaPrecipSelfContained widget (Apex):", e);
+        error = e?.message ?? "Unknown error";
         loading = false;
       }
     })();
@@ -111,8 +135,14 @@
   });
 </script>
 
-<h1>Nasa precipitation Data</h1>
-<canvas bind:this={canvasEl}></canvas>
+<!-- Use the same `style` class to control size (w-full h-64, etc.) -->
+<div bind:this={chartEl} class={style}>
+  {#if loading}
+    <p class="text-center text-white-500 py-12">
+      Loading precipitation data...
+    </p>
+  {/if}
+</div>
 
 {#if error}
   <p class="text-red-500">Error: {error}</p>
