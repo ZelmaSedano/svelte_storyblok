@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ params }) => {
     published_at: story.published_at ?? null,
     updated_at: story.updated_at ?? null,
   };
- 
+
   return mappedArticle ;
 };
 

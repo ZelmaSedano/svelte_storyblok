@@ -6,9 +6,10 @@
   // singular article page, showing the title and content of a single article
 </script>
 
-<section class="space-y-4 rounded-3xl bg-white/10
-         backdrop-blur-md shadow-xl px-6 py-5
-         hover:bg-white/15 hover:border-white/30 transition"
+<section
+  class="space-y-4 rounded-3xl bg-white/10
+        backdrop-blur-md shadow-xl px-6 py-5
+        hover:bg-white/15 hover:border-white/30 transition"
 >
   <h1 class="text-3xl font-bold tracking-tight drop-shadow-sm">
     {data.title}
