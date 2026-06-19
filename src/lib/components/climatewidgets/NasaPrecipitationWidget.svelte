@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import ApexCharts from "apexcharts";
+  import type ApexCharts from "apexcharts";
   import { getNasaPrecipData } from "$lib/api/nasa-precip";
 
   let chartEl: HTMLDivElement | null = null;
@@ -8,7 +8,9 @@
   let loading = true;
   let error: string | null = null;
 
-  const { title, style } = $props();
+  // version 4 syntax
+  export let title: string;
+  export let style: string;
 
   onMount(() => {
     const destroyChart = () => {
@@ -115,14 +117,14 @@
         };
 
         console.log("Creating ApexCharts chart", chartEl);
+        const ApexChartsModule: any = await import("apexcharts");
+        const ApexCharts = ApexChartsModule?.default ?? ApexChartsModule;
         chart = new ApexCharts(chartEl, options);
-        await chart.render().then((data) => {
-          if (data) {
-            chart?.updateOptions({
-              ...options,
-              ...{ noData: { text: "Loading precipitation data..." } },
-            });
-          }
+        // .render() allows the chart to finish rendering, THEN goes to the next line
+        await chart.render();
+        chart?.updateOptions({
+          ...options,
+          ...{ noData: { text: "Loading precipitation data..." } },
         });
       } catch (e: any) {
         console.error("Error in NasaPrecipSelfContained widget (Apex):", e);

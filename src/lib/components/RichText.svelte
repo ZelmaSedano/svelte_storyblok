@@ -4,7 +4,7 @@
 
   const { content = null } = $props(); // check if doc is provided otherwise null
   console.log('RichText component received content:', content);
- </script>
+</script>
 
 {#if content}
   {#each content as paragraph}
