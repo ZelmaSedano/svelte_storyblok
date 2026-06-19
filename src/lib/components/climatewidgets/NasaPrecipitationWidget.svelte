@@ -117,15 +117,20 @@
         };
 
         console.log("Creating ApexCharts chart", chartEl);
+
         const ApexChartsModule: any = await import("apexcharts");
         const ApexCharts = ApexChartsModule?.default ?? ApexChartsModule;
         chart = new ApexCharts(chartEl, options);
+
         // .render() allows the chart to finish rendering, THEN goes to the next line
-        await chart.render();
-        chart?.updateOptions({
-          ...options,
-          ...{ noData: { text: "Loading precipitation data..." } },
-        });
+        // must include ! after chart, just in case it's null/empty
+        await chart!.render();
+        if (chart) {
+          chart!.updateOptions({
+            ...options,
+            ...{ noData: { text: "Loading precipitation data..." } },
+          });
+        }
       } catch (e: any) {
         console.error("Error in NasaPrecipSelfContained widget (Apex):", e);
         error = e?.message ?? "Unknown error";
